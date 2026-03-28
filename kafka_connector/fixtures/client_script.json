@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Kafka Connector",
+  "enabled": 1,
+  "modified": "2026-03-28 22:46:51.591326",
+  "module": "Kafka Connector",
+  "name": "Kafka Fields Choose",
+  "script": "frappe.ui.form.on('Kafka Connector', {\n    // Triggered when the 'doctype_used' field is changed\n    doctype_used: function(frm) {\n        console.log(\"changed\");\n        if (!frm.doc.doctype_used) {\n            frm.clear_table('connector_fields');\n            frm.refresh_field('connector_fields');\n            return;\n        }\n\n        // Standard Frappe way to fetch DocType structure (meta)\n        frappe.model.with_doctype(frm.doc.doctype_used, function() {\n            let meta = frappe.get_meta(frm.doc.doctype_used);\n            \n            if (meta && meta.fields) {\n                // 1. Clear existing rows to prevent duplicates on change\n                frm.clear_table('connector_fields');\n\n                // 2. Map through fields and exclude layout-only types\n                meta.fields.forEach(f => {\n                    const excludeTypes = ['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button'];\n                    \n                    if (!excludeTypes.includes(f.fieldtype)) {\n                        let row = frm.add_child('connector_fields');\n                        \n                        // NOTE: Ensure 'field_name' matches the actual fieldname in your Child Table\n                        row.field_name = f.fieldname; \n                        row.label = f.label;\n                        row.field_type = f.fieldtype;\n                        row.include = 1; \n                    }\n                });\n\n                // 3. UI Refresh\n                frm.refresh_field('connector_fields');\n                frappe.show_alert({\n                    message: __('{0} fields loaded', [frm.doc.connector_fields.length]),\n                    indicator: 'green'\n                });\n            }\n        });\n    },\n\n    // Handles the initial load if the record already has a DocType selected\n    onload: function(frm) {\n        if (frm.is_new() && frm.doc.doctype_used) {\n            frm.trigger('doctype_used');\n        }\n    },\n\n    // Refresh logic to ensure the child table is visible and formatted\n    refresh: function(frm) {\n        // You can add custom buttons here later if needed\n    }\n});",
+  "view": "Form"
+ }
+]
