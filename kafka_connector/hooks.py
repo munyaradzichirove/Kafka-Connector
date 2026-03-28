@@ -252,3 +252,16 @@ fixtures = [
         ["module", "in", ["Kafka Connector"]]
     ]}
 ]
+
+# hooks.py in kafka_connector
+
+doc_events = {
+    "*": {  # or you can replace "*" with specific DocTypes like "Sales Invoice"
+        "after_insert": "kafka_connector.kafka_handler.handle_event",
+        "on_update": "kafka_connector.kafka_handler.handle_event",
+        "on_submit": "kafka_connector.kafka_handler.handle_event",
+        "on_cancel": "kafka_connector.kafka_handler.handle_event",
+        "on_trash": "kafka_connector.kafka_handler.handle_event"
+    }
+}
+
