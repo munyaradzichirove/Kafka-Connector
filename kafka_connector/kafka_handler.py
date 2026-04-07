@@ -1,13 +1,62 @@
 import frappe
 import json
+from kafka import KafkaProducer
+import threading
 
-def send_to_kafka(server, topic, payload):
+# producer cache
+_producers = {}
+_lock = threading.Lock()
+
+def get_producer(bootstrap: str) -> KafkaProducer:
     """
-    Bro-level placeholder: actual Kafka/Redpanda producer code goes here.
+    Returns a cached Kafka producer per bootstrap server string
     """
-    print(f"[Kafka] Server: {server}, Topic: {topic}, Payload: {json.dumps(payload)}")
+    if bootstrap not in _producers:
+        with _lock:
+            if bootstrap not in _producers:
+                _producers[bootstrap] = KafkaProducer(
+                    bootstrap_servers=bootstrap,
+                    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                    key_serializer=lambda v: v.encode("utf-8") if v else None,
+                    acks="all",
+                    retries=3,
+                    linger_ms=5,
+                )
+    return _producers[bootstrap]
 
+def send_to_kafka(server_doc_name: str, topic: str, payload: dict):
+    """
+    server_doc_name → Name of Kafka Server DocType
+    topic → Kafka topic
+    payload → dictionary to send
+    """
+    try:
+        # fetch host and port from Kafka Server
+        server_doc = frappe.get_doc("Kafka Server", server_doc_name)
+        host = server_doc.host
+        port = server_doc.port
 
+        if not host or not port:
+            frappe.log_error(f"Kafka server host/port missing for {server_doc_name}", "Kafka Error")
+            return
+
+        bootstrap = f"{host}:{port}"
+
+        producer = get_producer(bootstrap)
+        key = payload.get("_name")  # same doc goes to same partition
+
+        future = producer.send(topic, key=key, value=payload)
+
+        # async callbacks
+        future.add_callback(
+            lambda m: print(f"[Kafka ✔] topic={m.topic}, partition={m.partition}, offset={m.offset}")
+        )
+        future.add_errback(
+            lambda e: print(f"[Kafka ✖ ERROR] {str(e)}")
+        )
+
+    except Exception as e:
+        print(f"[Kafka FATAL] {str(e)}")
 EVENT_MAP = {
     "After Insert": "after_insert",
     "On Update": "on_update",
@@ -49,5 +98,5 @@ def handle_event(doc, method):
         payload["_doctype"] = doc.doctype
         payload["_name"] = doc.name
 
-        # # send to kafka (placeholder)
-        # send_to_kafka(connector.server, connector.topic, payload)
+   
+        send_to_kafka(connector.server, connector.topic, payload)

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class KafkaServers(Document):
+class KafkaServer(Document):
 	pass

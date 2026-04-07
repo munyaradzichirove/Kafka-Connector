@@ -79,7 +79,7 @@
  "modified": "2026-03-28 22:14:33.303204",
  "modified_by": "Administrator",
  "module": "Kafka Connector",
- "name": "Kafka Servers",
+ "name": "Kafka Server",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

@@ -5,7 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "connector_name",
+  "topic",
   "server",
   "host",
   "enabled",
@@ -17,18 +17,6 @@
   "connector_fields"
  ],
  "fields": [
-  {
-   "description": "Friendly name",
-   "fieldname": "connector_name",
-   "fieldtype": "Data",
-   "in_filter": 1,
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Connector Name",
-   "reqd": 1
-  },
   {
    "default": "1",
    "fieldname": "enabled",
@@ -49,7 +37,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Server",
-   "options": "Kafka Servers",
+   "options": "Kafka Server",
    "reqd": 1
   },
   {
@@ -101,12 +89,24 @@
    "fieldname": "connector_fields",
    "fieldtype": "Table",
    "options": "Connector Fields"
+  },
+  {
+   "description": "Friendly name",
+   "fieldname": "topic",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Topic",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-28 22:25:28.745722",
+ "modified": "2026-04-05 17:07:25.168226",
  "modified_by": "Administrator",
  "module": "Kafka Connector",
  "name": "Kafka Connector",
@@ -132,5 +132,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "connector_name"
+ "title_field": "topic"
 }
