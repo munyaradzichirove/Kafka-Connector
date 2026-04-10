@@ -6,17 +6,15 @@ import threading
 # producer cache
 _producers = {}
 _lock = threading.Lock()
-
 def get_producer(bootstrap: str) -> KafkaProducer:
-    """
-    Returns a cached Kafka producer per bootstrap server string
-    """
     if bootstrap not in _producers:
         with _lock:
             if bootstrap not in _producers:
+                # Adding api_version is the fix for your WSL NoBrokersAvailable error
                 _producers[bootstrap] = KafkaProducer(
                     bootstrap_servers=bootstrap,
-                    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                    api_version=(0, 11, 5),  # Mandatory for Redpanda + kafka-python
+                    value_serializer=lambda v: json.dumps(v, default=str).encode("utf-8"), # Added default=str for dates
                     key_serializer=lambda v: v.encode("utf-8") if v else None,
                     acks="all",
                     retries=3,
@@ -41,7 +39,6 @@ def send_to_kafka(server_doc_name: str, topic: str, payload: dict):
             return
 
         bootstrap = f"{host}:{port}"
-
         producer = get_producer(bootstrap)
         key = payload.get("_name")  # same doc goes to same partition
 
