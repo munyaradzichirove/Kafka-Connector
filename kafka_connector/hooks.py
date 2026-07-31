@@ -253,7 +253,7 @@ fixtures = [
     ]}
 ]
 
-# hooks.py in kafka_connector
+# hooks.py in kafka_connector here
 
 doc_events = {
     "*": {  # or you can replace "*" with specific DocTypes like "Sales Invoice"
